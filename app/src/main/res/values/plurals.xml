@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="current_streak">
+        <item quantity="one">Current streak: %d day</item>
+        <item quantity="other">Current streak: %d days</item>
+    </plurals>
+</resources>
