@@ -20,6 +20,7 @@ class AppViewModel : ViewModel() {
     val challenges = mutableStateListOf<Challenge>().apply {
         addAll(challengeList)
     }
+    lateinit var lastDeletedChallenge:Pair<Challenge,Int>
 
 /*
 init {
@@ -46,9 +47,14 @@ init {
     fun addNewChallenge(name: String) {
         challenges.add(Challenge(name))
     }
+    fun undoRemoving() {
+        val (challenge, index) = lastDeletedChallenge
+        challenges.add(index,challenge)
+    }
 
-    fun removeChallenge() {
-
+    fun removeChallenge(removed:Challenge) {
+        lastDeletedChallenge = removed to challenges.indexOf(removed)
+        challenges.remove(removed)
     }
 
     suspend fun saveInStorage(context: Context) {
