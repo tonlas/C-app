@@ -358,8 +358,7 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
         ) {
             items(items = challenges, key = { it.toString() }) {
                 SwipeToDeleteContainer(item = it, onDelete = { deletedChallenge ->
-                    val indexOfRemoved = challenges.indexOf(deletedChallenge)
-                    challenges.remove(deletedChallenge)
+                    viewModel.removeChallenge(deletedChallenge)
                     scope.launch {
                         val result = snackbarHostState.showSnackbar(
                                 message = "Undoing deleting",
@@ -368,7 +367,7 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
                             )
                         when (result) {
                             SnackbarResult.ActionPerformed -> {
-                                challenges.add(indexOfRemoved, deletedChallenge)
+                                viewModel.undoRemoving()
                             }
 
                             SnackbarResult.Dismissed -> {}
