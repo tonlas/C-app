@@ -39,22 +39,8 @@ val challengeList = mutableListOf<Challenge>()/*.also {
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
-class Challenge(var name: String,@EncodeDefault val calendar: ChallengeCalendar = ChallengeCalendar()) {
-    fun changeName(newName: String) {
-        name = newName
-    }
+data class Challenge(var name: String,@EncodeDefault val calendar: ChallengeCalendar = ChallengeCalendar())
 
-
-
-}
-
-/*fun main() {
-
-    val serialized = Json { prettyPrint=true }.encodeToString(challengeList)
-    println(serialized)
-    val deserialized =Json.decodeFromString<List<Challenge>>(serialized)
-    println(deserialized)
-}*/
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ChallengeCalendar(
@@ -125,7 +111,7 @@ data class ChallengeCalendar(
     }
 
 
-    fun addNew(cs: Boolean, calendar: LocalDate = LocalDate.now()) {
+    private fun addNew(cs: Boolean, calendar: LocalDate = LocalDate.now()) {
         list.add(ChallengeDay(cs, calendar))
         updateStreaks()
 

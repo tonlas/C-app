@@ -5,6 +5,7 @@ import android.view.ViewTreeObserver
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +38,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -242,58 +244,64 @@ fun DialogWithEditTextField(
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SwipeToDeleteContainer(
     item: T, onDelete: (T) -> Unit, animationDuration: Int = 500, content: @Composable (T) -> Unit
 ) {
+
     var isRemoved by remember {
         mutableStateOf(false)
     }
+
+    val coroutineScope = rememberCoroutineScope()
     val state = rememberSwipeToDismissBoxState(confirmValueChange = { value ->
         if (value == SwipeToDismissBoxValue.EndToStart) {
-            isRemoved = true
+            coroutineScope.launch {
+                isRemoved = true
+                delay(animationDuration.toLong())
+                onDelete(item)
+            }
             true
         } else false
     })
+
     LaunchedEffect(key1 = isRemoved) {
         if (isRemoved) {
-            delay(animationDuration.toLong())
-            onDelete(item)
-
+            isRemoved = false
+            state.reset()
         }
     }
+
     AnimatedVisibility(
-        visible = !isRemoved, exit = shrinkVertically(
+        visible = !isRemoved,
+        enter = scaleIn(animationSpec = tween(animationDuration)),
+        exit = shrinkVertically(
             animationSpec = tween(animationDuration), shrinkTowards = Alignment.Top
         ) + fadeOut()
     ) {
-
         SwipeToDismissBox(
             state = state,
-            backgroundContent = { DeleteBackground(swipeDismissState = state.dismissDirection) },
+            backgroundContent = {
+
+                val color =
+                    if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color.Red else Color.Transparent
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "",
+                        tint = if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color.White else Color.Transparent,
+                        modifier = Modifier.padding(end = 7.dp)
+                    )
+                }
+            },
             content = { content(item) },
-
-            )
-    }
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DeleteBackground(swipeDismissState: SwipeToDismissBoxValue) {
-    val color =
-        if (swipeDismissState == SwipeToDismissBoxValue.EndToStart) Color.Red else Color.Transparent
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color), contentAlignment = Alignment.CenterEnd
-    ) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = "",
-            tint = if (swipeDismissState == SwipeToDismissBoxValue.EndToStart) Color.White else Color.Transparent,
-            modifier = Modifier.padding(end = 7.dp)
         )
     }
 }
@@ -330,7 +338,14 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }, bottomBar = {
+    Scaffold(snackbarHost = {
+        SnackbarHost(hostState = snackbarHostState){ data ->
+            // custom snackbar with the custom border
+            Snackbar(
+                modifier = Modifier.border(2.dp, Color.White,RoundedCornerShape(13.dp)),
+                snackbarData = data
+            )
+        } }, bottomBar = {
         BottomAppBar(
             modifier = Modifier.padding(5.dp)
             // add color
@@ -351,7 +366,7 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
             }
         }
     }, floatingActionButtonPosition = FabPosition.EndOverlay
-    ) {
+    ) { it ->
 
         LazyColumn(
             modifier = Modifier.padding(bottom = it.calculateBottomPadding())
@@ -361,20 +376,22 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
                     viewModel.removeChallenge(deletedChallenge)
                     scope.launch {
                         val result = snackbarHostState.showSnackbar(
-                                message = "Undoing deleting",
-                                actionLabel = "Undo",
-                                duration = SnackbarDuration.Short
-                            )
+                            message = "Undoing deleting",
+                            actionLabel = "Undo",
+                            duration = SnackbarDuration.Short
+                        )
                         when (result) {
                             SnackbarResult.ActionPerformed -> {
+                                delay(500L)
                                 viewModel.undoRemoving()
                             }
 
-                            SnackbarResult.Dismissed -> {}
+                            SnackbarResult.Dismissed -> {
+                            }
                         }
                     }
-                }) {
-                    Challenge(name = it.name, calendar = it.calendar)
+                }) { challenge->
+                    Challenge(name = challenge.name, calendar = challenge.calendar)
                 }
             }
         }
