@@ -1,1 +1,10 @@
-
+<resources>
+  
+    <string name="dismiss_to_create_new_challenge">Отменить</string>
+    <string name="confirm_to_create_new_challenge">Подтвердить</string>
+    <string name="label_description_for_creating_new_challenge">Добавить новый</string>
+    <string name="icon_when_challenge_is_deleting">Удаление испытания</string>
+    <string name="snackbar_message_after_challenge_was_deleted">Отменить удаление?</string>
+    <string name="snackbar_action_after_challenge_was_deleted">Отменить</string>
+    
+</resources>
