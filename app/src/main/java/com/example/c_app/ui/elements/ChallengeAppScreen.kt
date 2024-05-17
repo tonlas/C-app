@@ -219,7 +219,7 @@ fun DialogWithEditTextField(
                     text.value = it
                 }, shape = RoundedCornerShape(13.dp), colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent
-                ), label = { Text("Adding new") })
+                ), label = { Text(text=getValue(R.string.label_description_for_creating_new_challenge)) })
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -228,13 +228,13 @@ fun DialogWithEditTextField(
                         onClick = { onDismissRequest() },
                         modifier = Modifier.padding(8.dp),
                     ) {
-                        Text("Dismiss")
+                        Text(text = getValue(R.string.dismiss_to_create_new_challenge))
                     }
                     TextButton(
                         onClick = { onConfirmation(text.value) },
                         modifier = Modifier.padding(8.dp),
                     ) {
-                        Text("Confirm")
+                        Text(text = getValue(R.string.confirm_to_create_new_challenge))
                     }
                 }
             }
@@ -291,7 +291,7 @@ fun DeleteBackground(swipeDismissState: SwipeToDismissBoxValue) {
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
-            contentDescription = "",
+            contentDescription = getValue(R.string.icon_when_challenge_is_deleting),
             tint = if (swipeDismissState == SwipeToDismissBoxValue.EndToStart) Color.White else Color.Transparent,
             modifier = Modifier.padding(end = 7.dp)
         )
@@ -362,8 +362,8 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
                     challenges.remove(deletedChallenge)
                     scope.launch {
                         val result = snackbarHostState.showSnackbar(
-                                message = "Undoing deleting",
-                                actionLabel = "Undo",
+                                message = getValue(R.string.snackbar_message_after_challenge_was_deleted),
+                                actionLabel = getValue(R.string.snackbar_action_after_challenge_was_deleted),
                                 duration = SnackbarDuration.Short
                             )
                         when (result) {

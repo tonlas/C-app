@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">C-app</string>
-
+    <string name="dismiss_to_create_new_challenge">Dismiss</string>
+    <string name="confirm_to_create_new_challenge">Confirm</string>
+    <string name="label_description_for_creating_new_challenge">Adding new</string>
+    <string name="icon_when_challenge_is_deleting">Deleting challenge</string>
+    <string name="snackbar_message_after_challenge_was_deleted">Undoing deleting</string>
+    <string name="snackbar_action_after_challenge_was_deleted">Undo</string>
+    
 </resources>
