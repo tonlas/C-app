@@ -81,6 +81,7 @@ init {
 
                         }
                     challenges.addAll(Json.decodeFromString<List<Challenge>>(savedData))
+                    updateStreaks()
                 }
             } catch (_: IOException) {
 
