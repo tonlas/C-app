@@ -42,6 +42,11 @@ init {
     }
 }
 */
+    fun updateStreaks(){
+        challenges.forEach{
+            it.updateStreaks()
+        }
+    }
 
     fun addNewChallenge(name: String) {
         challenges.add(Challenge(name))
