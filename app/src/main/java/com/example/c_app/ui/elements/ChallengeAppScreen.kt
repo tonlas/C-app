@@ -156,11 +156,15 @@ fun Challenge(name: String, calendar: ChallengeCalendar) {
             }
 
             Text(
-                text = pluralStringResource(
+                text =if(checkState.value){ pluralStringResource(
                     R.plurals.current_streak,
                     _calendar.value.currentStreak,
                     _calendar.value.currentStreak
-                ),
+                )} else {pluralStringResource(
+                    R.plurals.last_streak,
+                    _calendar.value.currentStreak,
+                    _calendar.value.currentStreak
+                )},
                 fontSize = 12.sp,
                 fontFamily = FontFamily.Serif,
                 modifier = Modifier.padding(start = 20.dp, top = 4.dp)
