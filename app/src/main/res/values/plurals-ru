@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="current_streak">
+        <item quantity="one">Текущий стрик: %d день</item>
+        <item quantity="few">Текущий стрик: %d дня</item>
+        <item quantity="other">Текущий стрик: %d дней</item>
+    </plurals>
+     <plurals name="last_streak">
+        <item quantity="one">Последний стрик: %d день</item>
+        <item quantity="few">Последний стрик: %d дня</item>
+        <item quantity="other">Последний стрик: %d дней</item>
+    </plurals>
+</resources>
