@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--challenge's description-->
     <plurals name="current_streak">
         <item quantity="one">Current streak: %d day</item>
         <item quantity="other">Current streak: %d days</item>
+    </plurals>
+    <plurals name="last_streak">
+        <item quantity="one">Last streak: %d day</item>
+        <item quantity="other">Last streak: %d days</item>
     </plurals>
 </resources>

@@ -70,6 +70,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -81,23 +82,23 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.example.c_app.ChallengeCalendar
+import com.example.c_app.Challenge
 import com.example.c_app.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun Challenge(name: String, calendar: ChallengeCalendar) {
+fun Challenge(challenge: Challenge) {
 
-    val _name = remember {
-        mutableStateOf(name)
+    val name = remember {
+        mutableStateOf(challenge.name)
     }
-    val _calendar = remember {
-        mutableStateOf(calendar)
+    val calendar = remember {
+        mutableStateOf(challenge.calendar)
     }
     val checkState = remember {
-        mutableStateOf(calendar.lastDateIsToday())
+        mutableStateOf(calendar.value.lastDateIsToday())
     }
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -122,8 +123,8 @@ fun Challenge(name: String, calendar: ChallengeCalendar) {
                 }
                 OutlinedTextField(
 
-                    value = _name.value,
-                    onValueChange = { it: String -> _name.value = it },
+                    value = name.value,
+                    onValueChange = { it: String -> name.value = it },
                     textStyle = TextStyle(
                         fontSize = 20.sp
                     ),
@@ -144,7 +145,7 @@ fun Challenge(name: String, calendar: ChallengeCalendar) {
                     checked = checkState.value,
                     onCheckedChange = { state ->
 
-                        _calendar.value.edit(state)
+                        calendar.value.edit(state)
                         checkState.value = state
 
                     },
@@ -158,11 +159,19 @@ fun Challenge(name: String, calendar: ChallengeCalendar) {
             }
 
             Text(
-                text = pluralStringResource(
-                    R.plurals.current_streak,
-                    _calendar.value.currentStreak,
-                    _calendar.value.currentStreak
-                ),
+                text = if (checkState.value) {
+                    pluralStringResource(
+                        R.plurals.current_streak,
+                        calendar.value.currentStreak,
+                        calendar.value.currentStreak
+                    )
+                } else {
+                    pluralStringResource(
+                        R.plurals.last_streak,
+                        calendar.value.currentStreak,
+                        calendar.value.currentStreak
+                    )
+                },
                 fontSize = 12.sp,
                 fontFamily = FontFamily.Serif,
                 modifier = Modifier.padding(start = 20.dp, top = 4.dp)
@@ -217,11 +226,15 @@ fun DialogWithEditTextField(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
 
-                OutlinedTextField(value = text.value, onValueChange = { it: String ->
-                    text.value = it
-                }, shape = RoundedCornerShape(13.dp), colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.Transparent
-                ), label = { Text("Adding new") })
+                OutlinedTextField(value = text.value,
+                    onValueChange = { it: String ->
+                        text.value = it
+                    },
+                    shape = RoundedCornerShape(13.dp),
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.Transparent
+                    ),
+                    label = { Text(text = stringResource(id = R.string.label_description_for_creating_new_challenge)) })
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -230,13 +243,13 @@ fun DialogWithEditTextField(
                         onClick = { onDismissRequest() },
                         modifier = Modifier.padding(8.dp),
                     ) {
-                        Text("Dismiss")
+                        Text(text = stringResource(id = R.string.dismiss_to_create_new_challenge))
                     }
                     TextButton(
                         onClick = { onConfirmation(text.value) },
                         modifier = Modifier.padding(8.dp),
                     ) {
-                        Text("Confirm")
+                        Text(text = stringResource(id = R.string.confirm_to_create_new_challenge))
                     }
                 }
             }
@@ -295,7 +308,7 @@ fun <T> SwipeToDeleteContainer(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "",
+                        contentDescription = stringResource(id = R.string.icon_when_challenge_is_deleting),
                         tint = if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color.White else Color.Transparent,
                         modifier = Modifier.padding(end = 7.dp)
                     )
@@ -307,9 +320,9 @@ fun <T> SwipeToDeleteContainer(
 }
 
 @Composable
-fun MyEventListener(OnEvent: (event: Lifecycle.Event) -> Unit) {
+fun MyEventListener(onEvent: (event: Lifecycle.Event) -> Unit) {
 
-    val eventHandler = rememberUpdatedState(newValue = OnEvent)
+    val eventHandler = rememberUpdatedState(newValue = onEvent)
     val lifecycleOwner = rememberUpdatedState(newValue = LocalLifecycleOwner.current)
 
     DisposableEffect(lifecycleOwner.value) {
@@ -339,13 +352,15 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(snackbarHost = {
-        SnackbarHost(hostState = snackbarHostState){ data ->
+        SnackbarHost(hostState = snackbarHostState) { data ->
             // custom snackbar with the custom border
+            // correct form of
             Snackbar(
-                modifier = Modifier.border(2.dp, Color.White,RoundedCornerShape(13.dp)),
+                modifier = Modifier.border(2.dp, Color.White, RoundedCornerShape(13.dp)),
                 snackbarData = data
             )
-        } }, bottomBar = {
+        }
+    }, bottomBar = {
         BottomAppBar(
             modifier = Modifier.padding(5.dp)
             // add color
@@ -376,8 +391,8 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
                     viewModel.removeChallenge(deletedChallenge)
                     scope.launch {
                         val result = snackbarHostState.showSnackbar(
-                            message = "Undoing deleting",
-                            actionLabel = "Undo",
+                            message = context.resources.getString(R.string.snackbar_message_after_challenge_was_deleted),
+                            actionLabel = context.resources.getString(R.string.snackbar_action_after_challenge_was_deleted),
                             duration = SnackbarDuration.Short
                         )
                         when (result) {
@@ -390,8 +405,8 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
                             }
                         }
                     }
-                }) { challenge->
-                    Challenge(name = challenge.name, calendar = challenge.calendar)
+                }) { challenge ->
+                    Challenge(challenge)
                 }
             }
         }
