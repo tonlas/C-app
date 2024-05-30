@@ -13,29 +13,19 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
-val challengeList = mutableListOf<Challenge>()/*.also {
+/*val challengeList = mutableListOf<Challenge>().also {
     with(it) {
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-        add(Challenge("Fuck"))
-
+        add(Challenge("Challenge for tests").apply {
+            calendar.addNew(true,LocalDate.now().minusDays(7.toLong()))
+            calendar.addNew(true,LocalDate.now().minusDays(6.toLong()))
+            calendar.addNew(true,LocalDate.now().minusDays(5.toLong()))
+            calendar.addNew(false,LocalDate.now().minusDays(4.toLong()))
+            calendar.addNew(true,LocalDate.now().minusDays(3.toLong()))
+            calendar.addNew(true,LocalDate.now().minusDays(2.toLong()))
+            calendar.addNew(true,LocalDate.now().minusDays(1.toLong()))
+            calendar.addNew(true,LocalDate.now())
+        })
     }}*/
-
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -43,11 +33,15 @@ data class Challenge(
     var name: String, @EncodeDefault val calendar: ChallengeCalendar = ChallengeCalendar()
 )
 
+/**
+ * Class for handling events in Challenge
+ */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ChallengeCalendar(
     @EncodeDefault var maxStreak: Int = 0,
     @EncodeDefault var currentStreak: Int = 0,
+    @EncodeDefault var lastStreak: Int = 0,
     @EncodeDefault val list: MutableList<ChallengeDay> = mutableListOf()
 ) {
 
@@ -62,8 +56,14 @@ data class ChallengeCalendar(
             if (penultimate.checked && last.checked && daysBetween == Period.parse("P1D")) {
                 currentStreak + 1
             } else if (last.checked) 1
-            else 0
+            else {
+                if (currentStreak != 0) {
+                    lastStreak = currentStreak
+                }
+                0
+            }
         }
+
         maxStreak = if (maxStreak > currentStreak) maxStreak else currentStreak
     }
 
@@ -109,6 +109,7 @@ data class ChallengeCalendar(
             maxStreak = 0
             currentStreak = 0
         }
+
     }
 
     private fun addNew(cs: Boolean, calendar: LocalDate = LocalDate.now()) {
@@ -121,14 +122,10 @@ data class ChallengeCalendar(
         try {
             val ld = list.last().date
             if (ld == today) {
-
                 list.last().checked = checkState
-
             } else {
-
                 addNew(checkState)
             }
-
         } catch (e: NoSuchElementException) {
             if (list.isEmpty()) {
                 addNew(checkState)
@@ -137,9 +134,9 @@ data class ChallengeCalendar(
         getStreaks()
     }
 
-    fun lastDateIsToday(): Boolean {
+    fun lastCheckedDateIsToday(): Boolean {
         return try {
-            list.last().date == LocalDate.now()
+            list.last().date == LocalDate.now() && list.last().checked
         } catch (e: NoSuchElementException) {
             false
         }

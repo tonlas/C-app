@@ -98,7 +98,7 @@ fun Challenge(challenge: Challenge) {
         mutableStateOf(challenge.calendar)
     }
     val checkState = remember {
-        mutableStateOf(calendar.value.lastDateIsToday())
+        mutableStateOf(calendar.value.lastCheckedDateIsToday())
     }
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -109,11 +109,12 @@ fun Challenge(challenge: Challenge) {
             .padding(10.dp)
 
     ) {
-        Column(verticalArrangement = Arrangement.Center,
+        Column(
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .padding(end = 10.dp)
                 .weight(8f)
-                .clickable { }) {
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 val focusManager = LocalFocusManager.current
@@ -137,7 +138,6 @@ fun Challenge(challenge: Challenge) {
                     keyboardActions = KeyboardActions(
                         onDone = { focusManager.clearFocus() },
                     ),
-
 
                     )
 
@@ -167,9 +167,7 @@ fun Challenge(challenge: Challenge) {
                     )
                 } else {
                     pluralStringResource(
-                        R.plurals.last_streak,
-                        calendar.value.currentStreak,
-                        calendar.value.currentStreak
+                        R.plurals.max_streak, calendar.value.maxStreak, calendar.value.maxStreak
                     )
                 },
                 fontSize = 12.sp,
@@ -356,7 +354,7 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
             // custom snackbar with the custom border
             // correct form of
             Snackbar(
-                modifier = Modifier.border(2.dp, Color.White, RoundedCornerShape(13.dp)),
+
                 snackbarData = data
             )
         }

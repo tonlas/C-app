@@ -6,9 +6,9 @@
         <item quantity="few">Текущий стрик: %d дня</item>
         <item quantity="many">Текущий стрик: %d дней</item>
     </plurals>
-    <plurals name="last_streak">
-        <item quantity="one">Последний стрик: %d день</item>
-        <item quantity="few">Последний стрик: %d дня</item>
-        <item quantity="many">Последний стрик: %d дней</item>
+    <plurals name="max_streak">
+        <item quantity="one">Максимальный стрик: %d день</item>
+        <item quantity="few">Максимальный стрик: %d дня</item>
+        <item quantity="many">Максимальный стрик: %d дней</item>
     </plurals>
 </resources>
