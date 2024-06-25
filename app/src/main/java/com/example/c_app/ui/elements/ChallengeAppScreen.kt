@@ -9,7 +9,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,7 +96,7 @@ fun Challenge(challenge: Challenge) {
     val calendar = remember {
         mutableStateOf(challenge.calendar)
     }
-    val checkState = remember {
+    val completedStateForToday = remember {
         mutableStateOf(calendar.value.lastCheckedDateIsToday())
     }
     Row(
@@ -122,8 +121,11 @@ fun Challenge(challenge: Challenge) {
                 if (!isKeyboardOpen) {
                     focusManager.clearFocus()
                 }
-                OutlinedTextField(
 
+                /**
+                 * Represents challenge's name and gives possibility to edit it.
+                 */
+                OutlinedTextField(
                     value = name.value,
                     onValueChange = { it: String -> name.value = it },
                     textStyle = TextStyle(
@@ -138,15 +140,16 @@ fun Challenge(challenge: Challenge) {
                     keyboardActions = KeyboardActions(
                         onDone = { focusManager.clearFocus() },
                     ),
-
-                    )
-
+                )
+                /**
+                 * Represents challenge's completedState and gives possibility to edit it.
+                 */
                 Checkbox(
-                    checked = checkState.value,
+                    checked = completedStateForToday.value,
                     onCheckedChange = { state ->
 
                         calendar.value.edit(state)
-                        checkState.value = state
+                        completedStateForToday.value = state
 
                     },
                     modifier = Modifier
@@ -157,9 +160,12 @@ fun Challenge(challenge: Challenge) {
 
                 )
             }
-
+            /**
+             * Represents challenge's current streak if today challenge is completed.
+             * If not - represents max streak of the challenge.
+             */
             Text(
-                text = if (checkState.value) {
+                text = if (completedStateForToday.value) {
                     pluralStringResource(
                         R.plurals.current_streak,
                         calendar.value.currentStreak,
@@ -175,11 +181,12 @@ fun Challenge(challenge: Challenge) {
                 modifier = Modifier.padding(start = 20.dp, top = 4.dp)
             )
         }
-
-
     }
 }
 
+/**
+ * Saves keyboard state to clear focus when needed.
+ */
 @Composable
 fun keyboardAsState(): State<Boolean> {
     val view = LocalView.current
@@ -199,6 +206,9 @@ fun keyboardAsState(): State<Boolean> {
     return rememberUpdatedState(isImeVisible)
 }
 
+/**
+ * Dialog window for creating new challenge.
+ */
 @Composable
 fun DialogWithEditTextField(
     onDismissRequest: () -> Unit,
@@ -223,7 +233,9 @@ fun DialogWithEditTextField(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
+                /**
+                 * Represents a field for entering the name of new challenge.
+                 */
                 OutlinedTextField(value = text.value,
                     onValueChange = { it: String ->
                         text.value = it
@@ -237,12 +249,18 @@ fun DialogWithEditTextField(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                 ) {
+                    /**
+                     * Represents button for dismissing creation.
+                     */
                     TextButton(
                         onClick = { onDismissRequest() },
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Text(text = stringResource(id = R.string.dismiss_to_create_new_challenge))
                     }
+                    /**
+                     * Represents button for confirming creation
+                     */
                     TextButton(
                         onClick = { onConfirmation(text.value) },
                         modifier = Modifier.padding(8.dp),
@@ -255,6 +273,9 @@ fun DialogWithEditTextField(
     }
 }
 
+/**
+ * Represents container, which appears when challenge deleting from the list of challenges by swipe.
+ */
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -317,6 +338,9 @@ fun <T> SwipeToDeleteContainer(
     }
 }
 
+/**
+ * Used to catch lifecycle events for data storage handling.
+ */
 @Composable
 fun MyEventListener(onEvent: (event: Lifecycle.Event) -> Unit) {
 
@@ -354,7 +378,6 @@ fun ChallengeAppScreen(viewModel: AppViewModel = androidx.lifecycle.viewmodel.co
             // custom snackbar with the custom border
             // correct form of
             Snackbar(
-
                 snackbarData = data
             )
         }

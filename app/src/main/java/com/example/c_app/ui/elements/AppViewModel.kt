@@ -14,9 +14,10 @@ import java.io.IOException
 
 class AppViewModel : ViewModel() {
     private var firstLaunch = true
-    val challenges = mutableStateListOf<Challenge>()/*.apply {
-        addAll(challengeList)
-    }*/
+    val challenges = mutableStateListOf<Challenge>()
+    /**
+     * The pair stores the challenge instance and its index in a list of all challenges to restore it to the same location when undo remove is called.
+     */
     private lateinit var lastDeletedChallenge: Pair<Challenge, Int>
 
     fun addNewChallenge(name: String) {

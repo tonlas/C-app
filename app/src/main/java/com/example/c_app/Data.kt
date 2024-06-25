@@ -13,20 +13,9 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
-/*val challengeList = mutableListOf<Challenge>().also {
-    with(it) {
-        add(Challenge("Challenge for tests").apply {
-            calendar.addNew(true,LocalDate.now().minusDays(7.toLong()))
-            calendar.addNew(true,LocalDate.now().minusDays(6.toLong()))
-            calendar.addNew(true,LocalDate.now().minusDays(5.toLong()))
-            calendar.addNew(false,LocalDate.now().minusDays(4.toLong()))
-            calendar.addNew(true,LocalDate.now().minusDays(3.toLong()))
-            calendar.addNew(true,LocalDate.now().minusDays(2.toLong()))
-            calendar.addNew(true,LocalDate.now().minusDays(1.toLong()))
-            calendar.addNew(true,LocalDate.now())
-        })
-    }}*/
-
+/**
+ * Represents an instance of the challenge. Consists of the name of the challenge and the challenge calendar.
+ */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class Challenge(
@@ -34,7 +23,7 @@ data class Challenge(
 )
 
 /**
- * Class for handling events in Challenge
+ * Represents calendar in which events of the challenge are marked.
  */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -45,35 +34,13 @@ data class ChallengeCalendar(
     @EncodeDefault val list: MutableList<ChallengeDay> = mutableListOf()
 ) {
 
-    private fun updateStreaks() { // used when adding new events at the end of the list
-        currentStreak = if (list.size == 1 && list.first().checked) {
-            1
-        } else {
-            val (penultimate, last) = list.takeLast(2)
-            val daysBetween = Period.between(penultimate.date, last.date)
-            println("${last}${penultimate}${daysBetween}/t${currentStreak}")
 
-            if (penultimate.checked && last.checked && daysBetween == Period.parse("P1D")) {
-                currentStreak + 1
-            } else if (last.checked) 1
-            else {
-                if (currentStreak != 0) {
-                    lastStreak = currentStreak
-                }
-                0
-            }
-        }
-
-        maxStreak = if (maxStreak > currentStreak) maxStreak else currentStreak
-    }
-
-    private fun getStreaks() { // used when adding/editing events in other places
-
+    private fun getStreaks() {
         // counting max and current from zero
         var count = 1
         var flag =
             true // it function will calculate current and max streaks at once so this flag is needed to stop calculate current streak
-        val checked = list.filter { it.checked }.sortedBy { it.date }
+        val checked = list.filter { it.completed }.sortedBy { it.date }
 
         if (checked.isNotEmpty()) {
             try {
@@ -112,23 +79,22 @@ data class ChallengeCalendar(
 
     }
 
-    private fun addNew(cs: Boolean, calendar: LocalDate = LocalDate.now()) {
-        list.add(ChallengeDay(cs, calendar))
-        updateStreaks()
+    private fun addNew(completedState: Boolean, calendar: LocalDate = LocalDate.now()) {
+        list.add(ChallengeDay(completedState, calendar))
     }
 
-    fun edit(checkState: Boolean) {
+    fun edit(completedState: Boolean) {
         val today = LocalDate.now()
         try {
             val ld = list.last().date
             if (ld == today) {
-                list.last().checked = checkState
+                list.last().completed = completedState
             } else {
-                addNew(checkState)
+                addNew(completedState)
             }
         } catch (e: NoSuchElementException) {
             if (list.isEmpty()) {
-                addNew(checkState)
+                addNew(completedState)
             }
         }
         getStreaks()
@@ -136,18 +102,24 @@ data class ChallengeCalendar(
 
     fun lastCheckedDateIsToday(): Boolean {
         return try {
-            list.last().date == LocalDate.now() && list.last().checked
+            list.last().date == LocalDate.now() && list.last().completed
         } catch (e: NoSuchElementException) {
             false
         }
     }
 }
 
+/**
+ * Represents a single challenge date. Completed property indicates whether the challenge completed on this date or not.
+ */
 @Serializable
 data class ChallengeDay(
-    var checked: Boolean, @Serializable(with = DateSerializer::class) val date: LocalDate
+    var completed: Boolean, @Serializable(with = DateSerializer::class) val date: LocalDate
 ) // you could add property to comment a challenge day
 
+/**
+ * All date stored in JSON format so serializer is needed for every class.
+ */
 @Serializer(forClass = LocalDate::class)
 object DateSerializer : KSerializer<LocalDate> {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
